@@ -1,0 +1,55 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
+using SplashScreen.Services;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using Xamarin.Forms;
+
+namespace SplashScreen
+{
+    // Learn more about making custom code visible in the Xamarin.Forms previewer
+    // by visiting https://aka.ms/xamarinforms-previewer
+    [DesignTimeVisible(false)]
+    public partial class MainPage : ContentPage
+    {
+        protected readonly RequestProvider requestProvider;
+        private readonly JsonSerializerSettings _serializerSettings;
+        public MainPage()
+        {
+            InitializeComponent();
+            _serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                NullValueHandling = NullValueHandling.Ignore
+            };
+        }
+
+        private async void Button_Clicked(object sender, EventArgs e)
+        {
+            HttpClient httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("REST URL");
+            string jsondata = @"RAW PARAMETERS";
+            var content = new StringContent(jsondata, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("PATH", content);
+            string responseData = await response.Content.ReadAsStringAsync();
+
+            JObject json = JsonConvert.DeserializeObject<JObject>(responseData, _serializerSettings); // First API Response
+
+            httpClient.DefaultRequestHeaders.Add("HEADERNAME", "HEADER VALUE");
+            string data="RAW PARAMETERS";
+             content = new StringContent(data, Encoding.UTF8, "application/json");
+             response = await httpClient.PostAsync("PATH", content);
+             responseData = await response.Content.ReadAsStringAsync();
+
+             json = JsonConvert.DeserializeObject<JObject>(responseData, _serializerSettings); // Second API Response
+
+        }
+    }
+}
